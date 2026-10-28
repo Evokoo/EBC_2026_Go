@@ -3,7 +3,7 @@ package quest01_test
 import (
 	"fmt"
 
-	. "github.com/Evokoo/EBC_2026/EBC_2026_Go/01"
+	. "github.com/Evokoo/EBC_2026_Go/01"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -23,7 +23,7 @@ var tests = []Test{
 	// {part: 3, file: "inputs/input_III.txt", target: -1},
 }
 
-var _ = Describe("EBC_2026 - 01", func() {
+var _ = Describe("EBC_2026_Go - 01", func() {
 	for _, test := range tests {
 		msg := fmt.Sprintf("Testing Part %d with %s", test.part, test.file)
 		It(msg, func() {
