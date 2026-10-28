@@ -9,7 +9,7 @@ import (
 )
 
 // ========================
-// I
+// PART I
 // ========================
 
 func I(values []int) int {
@@ -29,6 +29,43 @@ func isSquare(n int) bool {
 	}
 	root := int(math.Sqrt(float64(n)))
 	return root*root == n
+}
+
+// ========================
+// PART II
+// ========================
+
+func II(values []int) int {
+	var result int
+	for i, n := range values {
+		for n < 8 || n%4 != 0 {
+			n++
+		}
+		result += n - values[i]
+	}
+	return result
+}
+
+// ========================
+// PART III
+// ========================
+
+func III(values []int) int {
+	var result int
+	for _, n := range values {
+		r := int(math.Sqrt(float64(n)))
+
+		if r%2 == 0 {
+			r++
+		}
+
+		for r*r-1 < n {
+			r += 2
+		}
+
+		result += r*r - 1 - n
+	}
+	return result
 }
 
 // ========================
