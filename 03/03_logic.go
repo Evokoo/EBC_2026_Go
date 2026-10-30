@@ -26,6 +26,7 @@ func I(pairs [][2]int) int {
 func III(pairs [][2]int) int {
 	var result int
 
+outer:
 	for _, pair := range pairs {
 		a := pair[0]
 		b := pair[1]
@@ -34,11 +35,8 @@ func III(pairs [][2]int) int {
 
 		for b > 0 {
 			b--
-			next := calculateISO([2]int{a, b})
-
-			if next == target {
-				target = 0
-				break
+			if calculateISO([2]int{a, b}) == target {
+				continue outer
 			}
 		}
 		result += target
@@ -51,8 +49,7 @@ func III(pairs [][2]int) int {
 // HELPERS
 // ========================
 func calculateISO(pair [2]int) int {
-	a := pair[0]
-	b := pair[1]
+	a, b := pair[0], pair[1]
 	ex := 0
 	sum := 0
 
@@ -88,6 +85,7 @@ func parseInput(file string) [][2]int {
 
 		a := matches[0]
 		b := matches[1]
+
 		for len(a) < len(b) {
 			a += a
 		}
