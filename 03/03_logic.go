@@ -82,9 +82,7 @@ func parseInput(file string) [][2]int {
 	for line := range strings.SplitSeq(data, "\n") {
 		values := strings.Split(line, "-")
 		matches := utils.QuickMatch(values[1], `\d+`)
-
-		a := matches[0]
-		b := matches[1]
+		a, b := matches[0], matches[1]
 
 		for len(a) < len(b) {
 			a += a
