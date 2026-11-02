@@ -7,86 +7,147 @@ import (
 )
 
 // ========================
-// PART I
+// LANDMASS
 // ========================
+type Landmass struct {
+	layout     [][]rune
+	rows, cols int
+}
+type Coordinate struct {
+	x, y int
+}
 
-func I(input Cells) int {
-	x := input.cols / 2
-	y := input.rows / 2
+var DIRECTIONS = []Coordinate{
+	{0, 1}, {0, -1}, {1, 0}, {-1, 0}, {1, 1}, {1, -1}, {-1, 1}, {-1, -1},
+}
 
-	var queue [][2]int
-	var seen map[string]struct{}
+func (l Landmass) GetCoordinate(coordinate Coordinate) rune {
+	return l.layout[coordinate.y][coordinate.x]
+}
+func (l *Landmass) UpdateCoordinate(coordinate Coordinate) {
+	(*l).layout[coordinate.y][coordinate.x] = '#'
+}
+func (l *Landmass) ValidateCoordinate(coordinate Coordinate) (bool, []Coordinate) {
+	score := 0
 
-	count := 0
-	queue = append(queue, [2]int{x, y})
+	var neighbours []Coordinate
+	for _, dir := range DIRECTIONS {
+		coord := Coordinate{coordinate.x + dir.x, coordinate.y + dir.y}
 
-	for len(queue) > 0 {
+		if coord.x >= 0 && coord.x < l.cols && coord.y >= 0 && coord.y < l.rows {
+			tile := l.GetCoordinate(coord)
+
+			switch tile {
+			case '0':
+				neighbours = append(neighbours, coord)
+			case '1':
+				neighbours = append(neighbours, coord)
+				score++
+			case '#':
+				score++
+			}
+		}
+	}
+
+	return score >= 5, neighbours
+}
+func (l *Landmass) InitSearch() Queue {
+	start := Coordinate{l.cols / 2, l.rows / 2}
+	(*l).UpdateCoordinate(start)
+
+	queue := newQueue()
+
+	for _, dir := range DIRECTIONS {
+		coord := Coordinate{start.x + dir.x, start.y + dir.y}
+		if coord.x >= 0 && coord.x < l.cols && coord.y >= 0 && coord.y < l.rows {
+			queue.Push(coord)
+		}
 
 	}
 
-	return 0
+	return queue
+}
+
+// ========================
+// PART I
+// ========================
+
+func I(lm Landmass) int {
+	queue := lm.InitSearch()
+	count := 1
+
+	for !queue.isEmpty() {
+		current := queue.Pop()
+
+		if lm.GetCoordinate(current) == '#' {
+			continue
+		}
+
+		if isLand, neighbours := lm.ValidateCoordinate(current); isLand {
+			count++
+			lm.UpdateCoordinate(current)
+
+			for _, neighbour := range neighbours {
+				queue.Push(neighbour)
+			}
+		}
+	}
+
+	return count
 }
 
 // ========================
 // PARSER
 // ========================
 
-type Cells struct {
-	grid       [][]rune
-	rows, cols int
-}
-
-func parseInput(file string) Cells {
+func parseInput(file string) Landmass {
 	data := utils.ReadFile(file)
 
-	var result Cells
+	var landmass Landmass
 	for line := range strings.SplitSeq(data, "\n") {
 		row := []rune(line)
 
-		if result.cols == 0 {
-			result.cols = len(row)
+		if landmass.cols == 0 {
+			landmass.cols = len(row)
 		}
-		result.rows++
-		result.grid = append(result.grid, row)
+		landmass.rows++
+		landmass.layout = append(landmass.layout, row)
 	}
-	return result
+	return landmass
 }
 
 // ========================
 // Queue
 // ========================
-type Queue [][2]int
+type Queue []Coordinate
 
 func newQueue() Queue {
 	return Queue{}
 }
-
-func (q *Queue) Push(pair [2]int) {
-	(*q) = append((*q), pair)
+func (q *Queue) Push(coordinate Coordinate) {
+	(*q) = append((*q), coordinate)
 }
-
-func (q *Queue) Pop() [2]int {
-	item := (*q)[0]
+func (q *Queue) Pop() Coordinate {
+	coordinate := (*q)[0]
 	*q = (*q)[1:]
-	return item
+	return coordinate
 }
-
 func (q Queue) isEmpty() bool {
-	return len(q) > 0
+	return len(q) == 0
 }
 
 // ========================
 // Set
 // ========================
-type Set map[string]struct{}
+type Set map[Coordinate]struct{}
 
-func (s Set) Add(item string) {
-	s[item] = struct{}{}
+func (s Set) Add(coord Coordinate) {
+	s[coord] = struct{}{}
 }
-func (s Set) Has(item string) bool {
-	_, found := s[item]
+func (s Set) Has(coord Coordinate) bool {
+	_, found := s[coord]
 	return found
 }
-func (s Set) Remove(item string) {
-	delete(s, item)
+func (s Set) Remove(coord Coordinate) {
+	delete(s, coord)
 }
