@@ -71,3 +71,21 @@ func (pq *PriorityQueue[T]) PopItem() T {
 func (pq *PriorityQueue[T]) IsEmpty() bool {
 	return len(pq.items) == 0
 }
+
+// ========================
+// SET (Generic)
+// ========================
+type Set[T comparable] map[T]struct{}
+
+func (s Set[T]) Add(item T) {
+	s[item] = struct{}{}
+}
+
+func (s Set[T]) Has(item T) bool {
+	_, found := s[item]
+	return found
+}
+
+func (s Set[T]) Remove(item T) {
+	delete(s, item)
+}
