@@ -11,7 +11,7 @@ import (
 // ========================
 
 func I(recipes Recipes, target string) int {
-	used := make(Set)
+	used := make(utils.Set[string])
 	DFS(recipes[target], &used, &recipes)
 	used.Remove(target)
 	return len(used)
@@ -26,7 +26,7 @@ func II(recipes Recipes, target string) int {
 
 	for item := range recipes {
 		if item != target {
-			used := make(Set)
+			used := make(utils.Set[string])
 			DFS(recipes[item], &used, &recipes)
 
 			if used.Has(target) {
@@ -46,7 +46,7 @@ func III(recipes Recipes) int {
 	result := 0
 
 	for item := range recipes {
-		used := make(Set)
+		used := make(utils.Set[string])
 		DFS(recipes[item], &used, &recipes)
 
 		count := 0
@@ -68,7 +68,7 @@ func III(recipes Recipes) int {
 // ========================
 // DFS
 // ========================
-func DFS(recipe []string, used *Set, recipes *Recipes) {
+func DFS(recipe []string, used *utils.Set[string], recipes *Recipes) {
 	for _, item := range recipe {
 		if !used.Has(item) {
 			used.Add(item)
@@ -96,20 +96,4 @@ func parseInput(file string) Recipes {
 	}
 
 	return result
-}
-
-// ========================
-// SET
-// ========================
-type Set map[string]struct{}
-
-func (s Set) Add(item string) {
-	s[item] = struct{}{}
-}
-func (s Set) Has(item string) bool {
-	_, found := s[item]
-	return found
-}
-func (s Set) Remove(item string) {
-	delete(s, item)
 }
