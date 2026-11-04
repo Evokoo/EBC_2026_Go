@@ -8,18 +8,11 @@ import (
 )
 
 // ========================
-// PART I
+// PART I & II
 // ========================
 func I(clouds CloudMap, power int) int {
 	DFS(clouds.FindInitialCloud(), power, &clouds)
 	return clouds.CalcuateTotalEnergy()
-}
-
-// ========================
-// PART III
-// ========================
-func III(clouds CloudMap, power, limit int) int {
-	return 0
 }
 
 func DFS(id, power int, clouds *CloudMap) {
@@ -32,6 +25,13 @@ func DFS(id, power int, clouds *CloudMap) {
 			DFS(connection, power-1, clouds)
 		}
 	}
+}
+
+// ========================
+// PART III
+// ========================
+func III(clouds CloudMap, power, limit int) int {
+	return 0
 }
 
 // ========================
