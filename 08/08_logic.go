@@ -86,7 +86,6 @@ func (t Tiles) LocateEdge() []Tile {
 		}
 	}
 
-	fmt.Println(edge)
 	return edge
 }
 
