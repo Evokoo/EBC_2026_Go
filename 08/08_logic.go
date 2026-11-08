@@ -1,7 +1,6 @@
 package quest08
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/Evokoo/EBC_2026_Go/utils"
@@ -15,28 +14,31 @@ func I(tiles Tiles) int {
 	total := 0
 
 	for _, tile := range edge {
-		count := 0
-		height := tile.value
+		powered := 1
+		shadow := tile.value
 
 		for {
 			if next, valid := tiles.Move(tile, DIRECTIONS["DR"]); valid {
-				if next.value < height {
-					count++
-					height = max(height-1, 0)
-				} else {
-					height = max(height, next.value)
+				if next.value >= shadow {
+					powered++
 				}
-
+				shadow = max(shadow-1, next.value)
 				tile = next
 			} else {
 				break
 			}
 		}
 
-		total += count
+		total += powered
 	}
+	return total
+}
 
-	fmt.Println(total)
+// ========================
+// PART II
+// ========================
+
+func II(tiles Tiles) int {
 	return 0
 }
 
@@ -45,9 +47,12 @@ func I(tiles Tiles) int {
 // ========================
 
 var DIRECTIONS = map[string][2]int{
-	"R":  {1, 0}, //{q,r}
+	"R":  {1, 0},
 	"DR": {1, 1},
+	"UR": {0, -1},
+	"L":  {-1, 0},
 	"DL": {0, 1},
+	"UL": {-1, -1},
 }
 
 type Tile struct {
@@ -60,6 +65,10 @@ func (t Tiles) Move(current Tile, direction [2]int) (Tile, bool) {
 	next := [2]int{current.q + direction[0], current.r + direction[1]}
 	tile, valid := t[next]
 	return tile, valid
+}
+
+func (t Tiles) LocateEdges() {
+
 }
 
 func (t Tiles) LocateEdge() []Tile {
@@ -91,17 +100,17 @@ func (t Tiles) LocateEdge() []Tile {
 
 func parseInput(file string) Tiles {
 	data := utils.ReadFile(file)
+	offset := len(utils.QuickMatch(data, `^\.+`)[0])
+
 	tiles := make(Tiles)
 	for r, line := range strings.Split(data, "\n") {
 		for i, char := range line {
 			if char != '.' {
 				n := int(char - '0')
-				q := (i - (4 - r)) / 2
+				q := (i - (offset - r)) / 2
 				tiles[[2]int{q, r}] = Tile{q, r, n}
 			}
 		}
 	}
-
-	tiles.LocateEdge()
 	return tiles
 }
