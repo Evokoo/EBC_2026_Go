@@ -10,7 +10,7 @@ import (
 // PART I
 // ========================
 func I(tiles Tiles) int {
-	edge := tiles.LocateEdge()
+	edge := tiles.LocateEdges()["DR"]
 	total := 0
 
 	for _, tile := range edge {
@@ -39,7 +39,29 @@ func I(tiles Tiles) int {
 // ========================
 
 func II(tiles Tiles) int {
-	return 0
+	total := 0
+
+	for key, edge := range tiles.LocateEdges() {
+		for _, tile := range edge {
+			powered := 1
+			shadow := tile.value
+
+			for {
+				if next, valid := tiles.Move(tile, DIRECTIONS[key]); valid {
+					if next.value >= shadow {
+						powered++
+					}
+					shadow = max(shadow-1, next.value)
+					tile = next
+				} else {
+					break
+				}
+			}
+
+			total += powered
+		}
+	}
+	return total
 }
 
 // ========================
@@ -67,8 +89,55 @@ func (t Tiles) Move(current Tile, direction [2]int) (Tile, bool) {
 	return tile, valid
 }
 
-func (t Tiles) LocateEdges() {
+type EdgeParts struct {
+	key   string
+	sides [2]int
+}
+type EdgeMap map[string][]Tile
 
+func (t Tiles) LocateEdges() EdgeMap {
+	tile := t[[2]int{0, 0}]
+	sides := make(map[int][]Tile)
+	for i, dir := range []string{"R", "DR", "DL", "L", "UL", "UR"} {
+		side := []Tile{tile}
+
+		for {
+			if next, ok := t.Move(tile, DIRECTIONS[dir]); ok {
+				side = append(side, next)
+				tile = next
+			} else {
+				break
+			}
+		}
+		sides[i] = side
+	}
+
+	edges := make(EdgeMap)
+	parts := []EdgeParts{
+		{"DR", [2]int{5, 0}},
+		{"DL", [2]int{0, 1}},
+		{"L", [2]int{1, 2}},
+		{"UL", [2]int{2, 3}},
+		{"UR", [2]int{3, 4}},
+		{"R", [2]int{4, 5}},
+	}
+
+	for _, part := range parts {
+		var tiles []Tile
+
+		for i, n := range part.sides {
+			side := sides[n]
+
+			if i == 1 {
+				tiles = append(tiles, side[1:]...)
+			} else {
+				tiles = append(tiles, side...)
+			}
+		}
+		edges[part.key] = tiles
+	}
+
+	return edges
 }
 
 func (t Tiles) LocateEdge() []Tile {
