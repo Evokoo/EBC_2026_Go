@@ -8,17 +8,27 @@ import (
 )
 
 // ========================
-// I
+// I & II
 // ========================
 
-func I(seeds []Seed) int {
+func I(seeds []Seed, part int) int {
 	result := 0
 
 	for _, seed := range seeds {
 		elements, seconds := 0, 0
 		segments := []int{0}
+		leaves := 1
 
-		for elements < seed.limit {
+		for {
+
+			if part == 1 && elements >= seed.limit {
+				break
+			}
+
+			if part == 2 && leaves >= seed.limit {
+				break
+			}
+
 			currentSegments := len(segments)
 			for i := range currentSegments {
 				segments[i]++
@@ -29,11 +39,11 @@ func I(seeds []Seed) int {
 					segments = append(segments, seed.growth/2)
 					segments = append(segments, 1)
 					elements++
+					leaves++
 				}
 			}
 			seconds++
 		}
-
 		result += seconds
 	}
 
