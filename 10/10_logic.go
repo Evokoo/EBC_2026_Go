@@ -16,8 +16,7 @@ func I(field Field, rounds int) int {
 		field.Update()
 	}
 
-	return field.collisions
-
+	return field.CountCollisions()
 }
 
 // ========================
@@ -36,14 +35,14 @@ type Coordinate struct {
 }
 
 type Ghost struct {
-	id, bearing int
-	pos         Coordinate
+	id, bearing, collisions int
+	pos                     Coordinate
+	active                  bool
 }
 
 type Field struct {
-	ghosts     []*Ghost
-	walls      utils.Set[Coordinate]
-	collisions int
+	ghosts []*Ghost
+	walls  utils.Set[Coordinate]
 }
 
 func (f *Field) Update() {
@@ -53,7 +52,7 @@ func (f *Field) Update() {
 		next := Coordinate{g.pos.x + dir.x, g.pos.y + dir.y}
 
 		if f.walls.Has(next) {
-			f.collisions++
+			g.collisions++
 			g.bearing = (g.bearing + 90) % 360
 		} else {
 			g.pos.x += dir.x
@@ -70,11 +69,19 @@ func (f *Field) Update() {
 	for _, ghosts := range occupied {
 		if len(ghosts) > 1 {
 			for _, g := range ghosts {
-				f.collisions++
+				g.collisions++
 				g.bearing = (g.bearing + 180) % 360
 			}
 		}
 	}
+}
+
+func (f Field) CountCollisions() int {
+	count := 0
+	for _, g := range f.ghosts {
+		count += g.collisions
+	}
+	return count
 }
 
 func parseInput(file string) Field {
@@ -91,9 +98,9 @@ func parseInput(file string) Field {
 			case '<', '>', 'v', '^':
 				id := len(ghosts)
 				bearing := map[rune]int{'<': 270, '>': 90, '^': 0, 'v': 180}[char]
-				ghosts = append(ghosts, &Ghost{id, bearing, Coordinate{x, y}})
+				ghosts = append(ghosts, &Ghost{id, bearing, 0, Coordinate{x, y}, true})
 			}
 		}
 	}
-	return Field{ghosts, walls, 0}
+	return Field{ghosts, walls}
 }
