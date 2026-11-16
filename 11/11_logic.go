@@ -8,6 +8,18 @@ import (
 )
 
 // ========================
+// I
+// ========================
+
+func I(ring Ring) int {
+	result := 0
+	for _, portal := range ring.portals {
+		result += ring.DistanceMap(portal.id)
+	}
+	return ring.baseDistance - result
+}
+
+// ========================
 // PARSER
 // ========================
 
@@ -15,9 +27,45 @@ type Portal struct {
 	id          int
 	connections []*Portal
 }
-type Ring map[int]*Portal
 
-func parseInput(file string) Ring {
+type Ring struct {
+	portals      map[int]*Portal
+	baseDistance int
+}
+
+func newRing() Ring {
+	return Ring{portals: make(map[int]*Portal), baseDistance: 0}
+}
+
+func (r Ring) DistanceMap(start int) int {
+	queue := [][2]int{{start, 0}}
+	distanceMap := make(map[int]int)
+
+	for len(queue) > 0 {
+		current := queue[0]
+		id, dist := current[0], current[1]
+		queue = queue[1:]
+
+		if _, found := distanceMap[id]; found {
+			continue
+		} else {
+			distanceMap[id] = dist
+		}
+
+		for _, portal := range r.portals[id].connections {
+			queue = append(queue, [2]int{portal.id, dist + 1})
+		}
+	}
+
+	total := 0
+	for _, dist := range distanceMap {
+		total += dist
+	}
+
+	return total
+}
+
+func parseInput(file string, spread int) Ring {
 	data := utils.ReadFile(file)
 
 	var count int
@@ -41,22 +89,29 @@ func parseInput(file string) Ring {
 		}
 	}
 
-	ring := make(Ring)
+	ring := newRing()
+
 	for i := range count {
-		ring[i+1] = &Portal{id: i + 1, connections: []*Portal{}}
+		ring.portals[i+1] = &Portal{id: i + 1, connections: []*Portal{}}
 	}
 
 	for i := range count {
 		curr := i + 1
-		next := (curr % count) + 1
-		prev := (curr-2+count)%count + 1
-		ring[curr].connections = append(ring[curr].connections, []*Portal{ring[prev], ring[next]}...)
+		for d := 1; d <= spread; d++ {
+			next := (i+d)%count + 1
+			prev := (i-d+count)%count + 1
+			ring.portals[curr].connections = append(ring.portals[curr].connections, ring.portals[prev], ring.portals[next])
+		}
+	}
+
+	for _, portal := range ring.portals {
+		ring.baseDistance += ring.DistanceMap(portal.id)
 	}
 
 	for _, pair := range links {
 		a, b := pair[0], pair[1]
-		ring[a].connections = append(ring[a].connections, ring[b])
-		ring[b].connections = append(ring[b].connections, ring[a])
+		ring.portals[a].connections = append(ring.portals[a].connections, ring.portals[b])
+		ring.portals[b].connections = append(ring.portals[b].connections, ring.portals[a])
 	}
 
 	return ring
