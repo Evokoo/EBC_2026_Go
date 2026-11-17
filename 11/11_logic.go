@@ -1,6 +1,7 @@
 package quest11
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -33,6 +34,24 @@ func II(ring Ring) int {
 	}
 
 	return result
+}
+
+// ========================
+// III
+// ========================
+
+func III(ring Ring) int {
+	// Generate indexs and pair permutations
+	steps := len(ring.portals) / 8
+	indexs := make([]int, 0, steps)
+
+	for i := 0; i < len(ring.portals); i += steps {
+		indexs = append(indexs, i+1)
+	}
+
+	fmt.Println(indexs)
+
+	return 0
 }
 
 // ========================

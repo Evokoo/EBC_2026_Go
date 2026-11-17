@@ -15,11 +15,11 @@ type Test struct {
 }
 
 var tests = []Test{
-	{part: 1, file: "inputs/example_I.txt", target: 60},
-	{part: 1, file: "inputs/input_I.txt", target: 1800},
-	{part: 2, file: "inputs/example_II.txt", target: 6},
-	{part: 2, file: "inputs/input_II.txt", target: 2360},
-	// {part: 3, file: "inputs/example_III.txt", target: -1},
+	// {part: 1, file: "inputs/example_I.txt", target: 60},
+	// {part: 1, file: "inputs/input_I.txt", target: 1800},
+	// {part: 2, file: "inputs/example_II.txt", target: 6},
+	// {part: 2, file: "inputs/input_II.txt", target: 2360},
+	{part: 3, file: "inputs/example_III.txt", target: 854},
 	// {part: 3, file: "inputs/input_III.txt", target: -1},
 }
 
