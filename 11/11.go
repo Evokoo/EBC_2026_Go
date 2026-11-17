@@ -5,7 +5,7 @@ func Solve(file string, part int) int {
 	case 1:
 		return I(parseInput(file, 1))
 	case 2:
-		return I(parseInput(file, 3))
+		return II(parseInput(file, 3))
 	}
 
 	panic("Invalid quest part")

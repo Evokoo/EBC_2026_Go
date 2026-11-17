@@ -12,11 +12,27 @@ import (
 // ========================
 
 func I(ring Ring) int {
+	return ring.CalculateMinRoute()
+}
+
+// ========================
+// II
+// ========================
+
+func II(ring Ring) int {
 	result := 0
-	for _, portal := range ring.portals {
-		result += ring.DistanceMap(portal.id)
+
+	for a, p1 := range ring.portals {
+		for b, p2 := range ring.portals {
+			if b <= a || !ring.LinkPortals(p1, p2) {
+				continue
+			}
+			result = max(ring.CalculateMinRoute(), result)
+			ring.UnlinkPortals(p1, p2)
+		}
 	}
-	return ring.baseDistance - result
+
+	return result
 }
 
 // ========================
@@ -25,7 +41,7 @@ func I(ring Ring) int {
 
 type Portal struct {
 	id          int
-	connections []*Portal
+	connections utils.Set[*Portal]
 }
 
 type Ring struct {
@@ -52,7 +68,7 @@ func (r Ring) DistanceMap(start int) int {
 			distanceMap[id] = dist
 		}
 
-		for _, portal := range r.portals[id].connections {
+		for portal := range r.portals[id].connections {
 			queue = append(queue, [2]int{portal.id, dist + 1})
 		}
 	}
@@ -63,6 +79,25 @@ func (r Ring) DistanceMap(start int) int {
 	}
 
 	return total
+}
+func (r Ring) CalculateMinRoute() int {
+	result := 0
+	for _, portal := range r.portals {
+		result += r.DistanceMap(portal.id)
+	}
+	return r.baseDistance - result
+}
+func (r Ring) LinkPortals(a, b *Portal) bool {
+	if a.connections.Has(b) {
+		return false
+	}
+	a.connections.Add(b)
+	b.connections.Add(a)
+	return true
+}
+func (r Ring) UnlinkPortals(a, b *Portal) {
+	a.connections.Remove(b)
+	b.connections.Remove(a)
 }
 
 func parseInput(file string, spread int) Ring {
@@ -92,7 +127,7 @@ func parseInput(file string, spread int) Ring {
 	ring := newRing()
 
 	for i := range count {
-		ring.portals[i+1] = &Portal{id: i + 1, connections: []*Portal{}}
+		ring.portals[i+1] = &Portal{id: i + 1, connections: make(utils.Set[*Portal])}
 	}
 
 	for i := range count {
@@ -100,7 +135,8 @@ func parseInput(file string, spread int) Ring {
 		for d := 1; d <= spread; d++ {
 			next := (i+d)%count + 1
 			prev := (i-d+count)%count + 1
-			ring.portals[curr].connections = append(ring.portals[curr].connections, ring.portals[prev], ring.portals[next])
+			ring.portals[curr].connections.Add(ring.portals[prev])
+			ring.portals[curr].connections.Add(ring.portals[next])
 		}
 	}
 
@@ -110,8 +146,8 @@ func parseInput(file string, spread int) Ring {
 
 	for _, pair := range links {
 		a, b := pair[0], pair[1]
-		ring.portals[a].connections = append(ring.portals[a].connections, ring.portals[b])
-		ring.portals[b].connections = append(ring.portals[b].connections, ring.portals[a])
+		ring.portals[a].connections.Add(ring.portals[b])
+		ring.portals[b].connections.Add(ring.portals[a])
 	}
 
 	return ring
