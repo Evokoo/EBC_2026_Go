@@ -20,6 +20,27 @@ func I(shapes []Shape) int {
 }
 
 // ========================
+// II
+// ========================
+func II(shapes []Shape) int {
+	spells := 0
+
+	for _, shape := range shapes {
+		if shape.cols != shape.rows {
+			dual := max(shape.cols, shape.rows) - min(shape.cols, shape.rows)
+
+			if dual < shape.cols && dual < shape.rows {
+				spells += dual
+			} else {
+				spells += min(shape.cols, shape.rows)
+			}
+		}
+	}
+
+	return spells
+}
+
+// ========================
 // PARSER
 // ========================
 
