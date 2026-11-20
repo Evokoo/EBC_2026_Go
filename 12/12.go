@@ -1,10 +1,11 @@
 package quest12
 
 func Solve(file string, part int) int {
-	parseInput(file)
+	shapes := parseInput(file)
+
 	switch part {
 	case 1:
-		return 0
+		return I(shapes)
 	}
 
 	panic("Invalid quest part")
