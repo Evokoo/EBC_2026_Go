@@ -4,10 +4,8 @@ func Solve(file string, part int) int {
 	shapes := parseInput(file)
 
 	switch part {
-	case 1:
+	case 1, 2, 3:
 		return I(shapes)
-	case 2:
-		return II(shapes)
 	}
 
 	panic("Invalid quest part")

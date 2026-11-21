@@ -6,35 +6,27 @@ import (
 	"github.com/Evokoo/EBC_2026_Go/utils"
 )
 
+// // ========================
+// // I
+// // ========================
+// func I(shapes []Shape) int {
+// 	spells := 0
+
+// 	for _, shape := range shapes {
+// 		spells += min(shape.cols, shape.rows)
+// 	}
+
+// 	return spells
+// }
+
 // ========================
-// I
+// I & II
 // ========================
 func I(shapes []Shape) int {
 	spells := 0
 
 	for _, shape := range shapes {
-		spells += min(shape.cols, shape.rows)
-	}
-
-	return spells
-}
-
-// ========================
-// II
-// ========================
-func II(shapes []Shape) int {
-	spells := 0
-
-	for _, shape := range shapes {
-		if shape.cols != shape.rows {
-			dual := max(shape.cols, shape.rows) - min(shape.cols, shape.rows)
-
-			if dual < shape.cols && dual < shape.rows {
-				spells += dual
-			} else {
-				spells += min(shape.cols, shape.rows)
-			}
-		}
+		spells += min(shape.cols, shape.rows, shape.shortX+shape.shortY)
 	}
 
 	return spells
@@ -51,8 +43,10 @@ type Coordinate struct {
 }
 
 type Shape struct {
-	pos        Coordinate
-	rows, cols int
+	pos            Coordinate
+	points         utils.Set[Coordinate]
+	rows, cols     int
+	shortX, shortY int
 }
 
 func parseInput(file string) []Shape {
@@ -70,8 +64,11 @@ func parseInput(file string) []Shape {
 			}
 
 			start := Coordinate{x, y}
-			shape := Shape{pos: start, rows: 0, cols: 0}
+			shape := Shape{pos: start, points: make(utils.Set[Coordinate])}
 			queue := []Coordinate{start}
+
+			minX, maxX := start.x, start.x
+			minY, maxY := start.y, start.y
 
 			for len(queue) > 0 {
 				current := queue[0]
@@ -79,24 +76,69 @@ func parseInput(file string) []Shape {
 
 				if visited.Has(current) {
 					continue
-				} else {
-					visited.Add(current)
 				}
+				visited.Add(current)
+				shape.points.Add(current)
+
+				minX = min(minX, current.x)
+				maxX = max(maxX, current.x)
+				minY = min(minY, current.y)
+				maxY = max(maxY, current.y)
 
 				for _, dir := range DIRECTIONS {
 					nx, ny := dir.x+current.x, dir.y+current.y
+					next := Coordinate{nx, ny}
 
-					if nx < 0 || nx >= cols || ny < 0 || ny >= rows || grid[ny][nx] != '#' {
+					if nx < 0 || nx >= cols || ny < 0 || ny >= rows || grid[ny][nx] != '#' || visited.Has(next) {
 						continue
 					}
 
-					queue = append(queue, Coordinate{nx, ny})
+					queue = append(queue, next)
 				}
-				shape.cols = max(shape.cols, current.x-start.x+1)
-				shape.rows = max(shape.rows, current.y-start.y+1)
 			}
+
+			shape.pos = Coordinate{x: minX, y: minY}
+			shape.cols = maxX - minX + 1
+			shape.rows = maxY - minY + 1
 			shapes = append(shapes, shape)
 		}
+	}
+
+	for i, shape := range shapes {
+		posA := shape.pos
+		posB := Coordinate{x: shape.pos.x, y: shape.pos.y + shape.rows - 1}
+		a, b := 0, 0
+
+		for range shape.cols {
+			if grid[posA.y][posA.x] == '#' && shape.points.Has(posA) {
+				a++
+			}
+			if grid[posB.y][posB.x] == '#' && shape.points.Has(posB) {
+				b++
+			}
+			posA.x++
+			posB.x++
+		}
+
+		shape.shortX = min(a, b)
+
+		posA = shape.pos
+		posB = Coordinate{x: shape.pos.x + shape.cols - 1, y: shape.pos.y}
+		a, b = 0, 0
+
+		for range shape.rows {
+			if grid[posA.y][posA.x] == '#' && shape.points.Has(posA) {
+				a++
+			}
+			if grid[posB.y][posB.x] == '#' && shape.points.Has(posB) {
+				b++
+			}
+			posA.y++
+			posB.y++
+		}
+
+		shape.shortY = min(a, b)
+		shapes[i] = shape
 	}
 
 	return shapes
