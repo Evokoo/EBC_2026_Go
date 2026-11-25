@@ -1,5 +1,6 @@
 package quest13
-	
+
 func Solve(file string) int {
-	return 0
+	dial := parseInput(file)
+	return I(dial)
 }
